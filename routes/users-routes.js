@@ -1,26 +1,8 @@
 const express = require("express");
+const usersController = require("../controllers/users-controller");
 
 const router = express.Router();
 
-const DUMMY_USERS = [
-  {
-    id: "u1",
-    name: "John Cameron",
-    email: "john.n.cameron@gmail.com"
-  },
-  {
-    id: "u2",
-    name: "Celina Yoo",
-    email: "celina.j.yoo@gmail.com"
-  }
-];
-
-router.get("/:id", (req, res, next) => {
-  const userId = req.params.id;
-  const user = DUMMY_USERS.find(u => {
-    return u.id === userId;
-  });
-  res.json({ user });
-});
+router.get("/:id", usersController.getUserById);
 
 module.exports = router;
