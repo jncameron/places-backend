@@ -1,4 +1,7 @@
 const uuid = require("uuid/v4");
+const { validationResult } = require("express-validator");
+
+const HttpError = require("../models/http-error");
 
 let DUMMY_USERS = [
   {
@@ -11,7 +14,7 @@ let DUMMY_USERS = [
     id: "u2",
     name: "Celina Yoo",
     email: "celina.j.yoo@gmail.com",
-    password: 1234
+    password: "1234"
   }
 ];
 
@@ -28,7 +31,18 @@ const getUsers = (req, res, next) => {
 };
 
 const signup = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new HttpError("Invalid inputs - check your data", 422);
+  }
   const { name, email, password } = req.body;
+  const hasUser = DUMMY_USERS.find(u => u.email === email);
+  if (hasUser) {
+    throw new HttpError(
+      "Sorry, this email address is already registered.",
+      422
+    );
+  }
 
   const createdUser = {
     id: uuid(),
@@ -40,8 +54,20 @@ const signup = (req, res, next) => {
   res.status(201).json({ user: createdUser });
 };
 
-const login = (req, res, next) => {};
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  const identifiedUser = DUMMY_USERS.find(u => u.email === email);
+  if (!identifiedUser || identifiedUser.password !== password) {
+    throw new HttpError(
+      "Could not identify user. Incorrect email or password",
+      401
+    );
+  }
+  res.status(200).json({ message: "Logged In!" });
+};
 
 exports.getUserById = getUserById;
 exports.getUsers = getUsers;
 exports.signup = signup;
+exports.login = login;
