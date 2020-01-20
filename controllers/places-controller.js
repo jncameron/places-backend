@@ -5,62 +5,41 @@ const HttpError = require("../models/http-error");
 const getCoordsForAddress = require("../util/location");
 const Place = require("../models/place");
 
-let DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "One of the most famous buildings in the world",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9856644
-    },
-    address: "20 W 34th St, New York, NY 10001, United States",
-    creator: "u1"
-  },
-  {
-    id: "p3",
-    title: "Empire State Building again",
-    description: "One of the most famous buildings in the world",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9856644
-    },
-    address: "20 W 34th St, New York, NY 10001, United States",
-    creator: "u1"
-  },
-  {
-    id: "p2",
-    title: "Sydney Opera House",
-    description: "Iconic location in Sydney",
-    location: {
-      lat: -33.8567799,
-      lng: 151.2131027
-    },
-    address: "Bennelong Point, Sydney NSW 2000",
-    creator: "u2"
-  }
-];
-
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
-  const place = DUMMY_PLACES.find(p => {
-    return p.id === placeId;
-  });
-  if (!place) {
-    throw new HttpError("Could not find a place for the provided user!", 404);
+  let place;
+
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    const error = new HttpError("Could not find a place", 500);
+    return next(error);
   }
-  res.json({ place });
+
+  if (!place) {
+    const error = new HttpError(
+      "Could not find a place for the provided user!",
+      404
+    );
+  }
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = (req, res, next) => {
-  const userId = req.params.id;
-  const places = DUMMY_PLACES.filter(p => {
-    return p.creator === userId;
-  });
-  if (!places || places.length === 0) {
-    throw new HttpError("Could not find places for the provided user id!", 404);
+const getPlacesByUserId = async (req, res, next) => {
+  const userId = req.params.uid;
+  let places;
+
+  try {
+    places = await Place.find({ creator: userId });
+  } catch (err) {
+    const error = new HttpError("Could not find any places for that user", 500);
+    return next(error);
   }
-  res.json({ places });
+
+  if (!places || places.length === 0) {
+    throw new HttpError("Could not find a place for the provided user!", 404);
+  }
+  res.json({ places: places.map(place => place.toObject({ getters: true })) });
 };
 
 const createPlace = async (req, res, next) => {
@@ -82,7 +61,7 @@ const createPlace = async (req, res, next) => {
     address,
     location: coordinates,
     image:
-      "https://www.history.com/.image/c_limit%2Ccs_srgb%2Cq_auto:good%2Cw_686/MTU3ODc4NjA0ODYzOTA3NTUx/image-placeholder-title.webp",
+      "https://i.dailymail.co.uk/1s/2018/12/29/04/7855716-6537197-Developer_Ecove_released_a_statement_on_Boxing_Day_where_directo-a-1_1546056205214.jpg",
     creator
   });
 
