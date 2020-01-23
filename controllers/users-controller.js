@@ -12,8 +12,15 @@ const getUserById = (req, res, next) => {
   res.json({ user });
 };
 
-const getUsers = (req, res, next) => {
-  res.json({ users: DUMMY_USERS });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await User.find({}, "-password");
+  } catch (err) {
+    const error = next(new HttpError("Could not find users", 500));
+    return next(error);
+  }
+  res.json({ users: users.map(user => user.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
@@ -21,7 +28,7 @@ const signup = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return next(new HttpError("Invalid inputs - check your data", 422));
   }
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
   let existingUser;
   try {
     existingUser = await User.findOne({ email: email });
@@ -44,7 +51,7 @@ const signup = async (req, res, next) => {
     password,
     image:
       "https://i.pinimg.com/474x/6c/2e/50/6c2e50c78952f2fbc073417a61359f36--scary-movies-horror-movies.jpg",
-    places
+    places: []
   });
 
   try {
