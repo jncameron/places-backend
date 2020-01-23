@@ -4,14 +4,6 @@ const { validationResult } = require("express-validator");
 const User = require("../models/user");
 const HttpError = require("../models/http-error");
 
-const getUserById = (req, res, next) => {
-  const userId = req.params.id;
-  const user = DUMMY_USERS.find(u => {
-    return u.id === userId;
-  });
-  res.json({ user });
-};
-
 const getUsers = async (req, res, next) => {
   let users;
   try {
@@ -82,7 +74,6 @@ const login = async (req, res, next) => {
   res.status(200).json({ message: "Logged In!" });
 };
 
-exports.getUserById = getUserById;
 exports.getUsers = getUsers;
 exports.signup = signup;
 exports.login = login;
