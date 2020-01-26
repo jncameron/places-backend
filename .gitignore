@@ -1,3 +1,4 @@
 /node_modules
 /util/map-api.js
 /util/mongo-connect.js
+/uploads
