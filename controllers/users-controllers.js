@@ -78,13 +78,14 @@ const signup = async (req, res, next) => {
     token = jwt.sign(
       { userId: createdUser.id, email: createdUser.email },
       "supertopsecretkey",
-      { expiresIn: "1hr" }
+      { expiresIn: "1h" }
     );
   } catch (err) {
     const error = new HttpError(
       "Signing up failed, please try again later.",
       500
     );
+    return next(error);
   }
 
   res
@@ -137,20 +138,21 @@ const login = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      { userId: existingUser.id, email: createdUser.email },
+      { userId: existingUser.id, email: existingUser.email },
       "supertopsecretkey",
-      { expiresIn: "1hr" }
+      { expiresIn: "1h" }
     );
   } catch (err) {
     const error = new HttpError(
       "Logging in failed, please try again later.",
       500
     );
+    return next(error);
   }
 
   res.json({
-    userId: createdUser.id,
-    email: createdUser.email,
+    userId: existingUser.id,
+    email: existingUser.email,
     token: token
   });
 };
