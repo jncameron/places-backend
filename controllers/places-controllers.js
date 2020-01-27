@@ -96,6 +96,7 @@ const createPlace = async (req, res, next) => {
       "Creating place failed, please try again.",
       500
     );
+    console.log(err);
     return next(error);
   }
 
