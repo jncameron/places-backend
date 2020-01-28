@@ -2,3 +2,4 @@
 /util/map-api.js
 /util/mongo-connect.js
 /uploads
+/nodemon.json
